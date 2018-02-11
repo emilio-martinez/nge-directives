@@ -1,4 +1,5 @@
-var_cache_key: &var_cache_key dependency-cache-{{ checksum "yarn.lock" }}
+var_dependency_cache_key: &var_dependency_cache_key dependency-cache-{{ checksum "yarn.lock" }}
+var_dependency_cache_path: &var_dependency_cache_path ~/.cache/yarn
 
 anchor_job_common: &anchor_job_common
   docker:
@@ -23,12 +24,12 @@ jobs:
       - checkout
       - run: *anchor_print_versions
       - restore_cache:
-          key: *var_cache_key
+          key: *var_dependency_cache_key
       - run: *anchor_install_deps
       - save_cache:
-          key: *var_cache_key
+          key: *var_dependency_cache_key
           paths:
-            - ~/.cache/yarn
+            - *var_dependency_cache_path
       - run:
           name: Build (prod)
           command: npm run build -- --prod
@@ -38,12 +39,12 @@ jobs:
       - checkout
       - run: *anchor_print_versions
       - restore_cache:
-          key: *var_cache_key
+          key: *var_dependency_cache_key
       - run: *anchor_install_deps
       - save_cache:
-          key: *var_cache_key
+          key: *var_dependency_cache_key
           paths:
-            - ~/.cache/yarn
+            - *var_dependency_cache_path
       - run:
           name: Lint
           command: npm run lint -- --format verbose --type-check
