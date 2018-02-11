@@ -1,0 +1,80 @@
+var_dependency_cache_key: &var_dependency_cache_key dependency-cache-{{ checksum "yarn.lock" }}
+var_dependency_cache_path: &var_dependency_cache_path ~/.cache/yarn
+
+anchor_job_common: &anchor_job_common
+  docker:
+    - image: popcornpool/chrome-node-yarn
+
+anchor_print_versions: &anchor_print_versions
+  name: Print versions
+  command: |
+    node --version
+    npm --version
+    yarn --version
+
+anchor_install_deps: &anchor_install_deps
+  name: Install Dependencies
+  command: yarn --pure-lockfile --non-interactive
+
+version: 2
+jobs:
+  lint:
+    <<: *anchor_job_common
+    steps:
+      - checkout
+      - run: *anchor_print_versions
+      - restore_cache:
+          key: *var_dependency_cache_key
+      - run: *anchor_install_deps
+      - save_cache:
+          key: *var_dependency_cache_key
+          paths:
+            - *var_dependency_cache_path
+      - run:
+          name: Format check
+          command: npm run format:check
+      - run:
+          name: Lint
+          command: npm run lint -- --format verbose --type-check
+  build:
+    <<: *anchor_job_common
+    steps:
+      - checkout
+      - run: *anchor_print_versions
+      - restore_cache:
+          key: *var_dependency_cache_key
+      - run: *anchor_install_deps
+      - save_cache:
+          key: *var_dependency_cache_key
+          paths:
+            - *var_dependency_cache_path
+      - run:
+          name: Build (prod)
+          command: npm run build -- --prod
+  test:
+    <<: *anchor_job_common
+    steps:
+      - checkout
+      - run: *anchor_print_versions
+      - restore_cache:
+          key: *var_dependency_cache_key
+      - run: *anchor_install_deps
+      - save_cache:
+          key: *var_dependency_cache_key
+          paths:
+            - *var_dependency_cache_path
+      - run:
+          name: Test
+          command:  npm run test -- --single-run
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - lint
+      - build:
+          requires:
+            - lint
+      - test:
+          requires:
+            - lint
