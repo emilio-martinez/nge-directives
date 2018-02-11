@@ -4,45 +4,42 @@ anchor_job_common: &anchor_job_common
   docker:
     - image: popcornpool/chrome-node-yarn
 
+anchor_print_versions: &anchor_print_versions
+  name: Print versions
+  command: |
+    node --version
+    npm --version
+    yarn --version
+
+anchor_install_deps: &anchor_install_deps
+  name: Install Dependencies
+  command: yarn --pure-lockfile --non-interactive
+
 version: 2
 jobs:
   build:
     <<: *anchor_job_common
     steps:
       - checkout
-      - run:
-          name: Print versions
-          command: |
-            node --version
-            npm --version
-            yarn --version
+      - run: *anchor_print_versions
       - restore_cache:
           key: *var_cache_key
-      - run:
-          name: Install Dependencies
-          command: yarn --pure-lockfile --non-interactive
+      - run: *anchor_install_deps
       - save_cache:
           key: *var_cache_key
           paths:
             - ~/.cache/yarn
       - run:
-          name: Prod Build
+          name: Build (prod)
           command: npm run build -- --prod
   test:
     <<: *anchor_job_common
     steps:
       - checkout
-      - run:
-          name: Print versions
-          command: |
-            node --version
-            npm --version
-            yarn --version
+      - run: *anchor_print_versions
       - restore_cache:
           key: *var_cache_key
-      - run:
-          name: Install Dependencies
-          command: yarn --pure-lockfile --non-interactive
+      - run: *anchor_install_deps
       - save_cache:
           key: *var_cache_key
           paths:
@@ -51,7 +48,7 @@ jobs:
           name: Lint
           command: npm run lint -- --format verbose --type-check
       - run:
-          name: Unit test
+          name: Test
           command:  npm run test -- --single-run
 workflows:
   version: 2
