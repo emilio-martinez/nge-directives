@@ -1,0 +1,61 @@
+var_cache_key: &var_cache_key dependency-cache-{{ checksum "yarn.lock" }}
+
+anchor_job_common: &anchor_job_common
+  docker:
+    - image: popcornpool/chrome-node-yarn
+
+version: 2
+jobs:
+  build:
+    <<: *anchor_job_common
+    steps:
+      - checkout
+      - run:
+          name: Print versions
+          command: |
+            node --version
+            npm --version
+            yarn --version
+      - restore_cache:
+          key: *var_cache_key
+      - run:
+          name: Install Dependencies
+          command: yarn --pure-lockfile --non-interactive
+      - save_cache:
+          key: *var_cache_key
+          paths:
+            - ~/.cache/yarn
+      - run:
+          name: Prod Build
+          command: npm run build -- --prod
+  test:
+    <<: *anchor_job_common
+    steps:
+      - checkout
+      - run:
+          name: Print versions
+          command: |
+            node --version
+            npm --version
+            yarn --version
+      - restore_cache:
+          key: *var_cache_key
+      - run:
+          name: Install Dependencies
+          command: yarn --pure-lockfile --non-interactive
+      - save_cache:
+          key: *var_cache_key
+          paths:
+            - ~/.cache/yarn
+      - run:
+          name: Lint
+          command: npm run lint -- --format verbose --type-check
+      - run:
+          name: Unit test
+          command:  npm run test -- --single-run
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test
