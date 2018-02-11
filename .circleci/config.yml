@@ -18,6 +18,24 @@ anchor_install_deps: &anchor_install_deps
 
 version: 2
 jobs:
+  lint:
+    <<: *anchor_job_common
+    steps:
+      - checkout
+      - run: *anchor_print_versions
+      - restore_cache:
+          key: *var_dependency_cache_key
+      - run: *anchor_install_deps
+      - save_cache:
+          key: *var_dependency_cache_key
+          paths:
+            - *var_dependency_cache_path
+      - run:
+          name: Format check
+          command: npm run format:check
+      - run:
+          name: Lint
+          command: npm run lint -- --format verbose --type-check
   build:
     <<: *anchor_job_common
     steps:
@@ -46,14 +64,17 @@ jobs:
           paths:
             - *var_dependency_cache_path
       - run:
-          name: Lint
-          command: npm run lint -- --format verbose --type-check
-      - run:
           name: Test
           command:  npm run test -- --single-run
+
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
-      - test
+      - lint
+      - build:
+          requires:
+            - lint
+      - test:
+          requires:
+            - lint
