@@ -16,9 +16,6 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@nge-directives/*": [
-        "libs/*"
-      ]
     }
   },
   "exclude": [
