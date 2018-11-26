@@ -1,1 +1,1 @@
-export { BooleanProperty, NumberProperty } from './lib/coercion';
+export { ArrayProperty, BooleanProperty, NumberProperty } from './lib/coercion';
