@@ -1,47 +1,34 @@
-import { coerceBooleanProperty, coerceNumberProperty } from '@angular/cdk/coercion';
+import { coerceArray, coerceBooleanProperty, coerceNumberProperty } from '@angular/cdk/coercion';
 
-function generatePrivateKey(propertyKey: PropertyKey) {
-  return typeof propertyKey === 'symbol' ? Symbol() : `__${propertyKey}`;
+function defineCoercionPropertyDecorator<T>(coercionFn: (value: any) => T): PropertyDecorator {
+  return function(target: Object, propertyKey: PropertyKey) {
+    if (target.hasOwnProperty(propertyKey)) {
+      return;
+    }
+
+    const privateKey = typeof propertyKey === 'symbol' ? Symbol() : `__${propertyKey}`;
+
+    Object.defineProperty(target, propertyKey, {
+      get() {
+        return this[privateKey];
+      },
+      set(value: any) {
+        this[privateKey] = coercionFn(value);
+      },
+      configurable: true,
+      enumerable: true
+    });
+  };
+}
+
+export function ArrayProperty<T>(): PropertyDecorator {
+  return defineCoercionPropertyDecorator(value => coerceArray<T>(value));
 }
 
 export function BooleanProperty(): PropertyDecorator {
-  return function(target: Object, propertyKey: PropertyKey) {
-    if (target.hasOwnProperty(propertyKey)) {
-      return;
-    }
-
-    const privateKey = generatePrivateKey(propertyKey);
-
-    Object.defineProperty(target, propertyKey, {
-      get() {
-        return this[privateKey];
-      },
-      set(value: any) {
-        this[privateKey] = coerceBooleanProperty(value);
-      },
-      configurable: true,
-      enumerable: true
-    });
-  };
+  return defineCoercionPropertyDecorator(value => coerceBooleanProperty(value));
 }
 
 export function NumberProperty<D>(fallback?: D): PropertyDecorator {
-  return function(target: Object, propertyKey: PropertyKey) {
-    if (target.hasOwnProperty(propertyKey)) {
-      return;
-    }
-
-    const privateKey = generatePrivateKey(propertyKey);
-
-    Object.defineProperty(target, propertyKey, {
-      get() {
-        return this[privateKey];
-      },
-      set(value: any) {
-        this[privateKey] = coerceNumberProperty(value, fallback);
-      },
-      configurable: true,
-      enumerable: true
-    });
-  };
+  return defineCoercionPropertyDecorator(value => coerceNumberProperty(value, fallback));
 }
