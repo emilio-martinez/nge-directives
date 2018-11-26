@@ -1,0 +1,7 @@
+{
+  "name": "@nge/decorators",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/cdk": "^7.0.0"
+  }
+}

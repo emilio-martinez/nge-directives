@@ -16,6 +16,9 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@nge/decorators": [
+        "libs/decorators/src/index.ts"
+      ]
     }
   },
   "exclude": [

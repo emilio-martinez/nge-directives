@@ -92,6 +92,44 @@
           }
         }
       }
+    },
+    "decorators": {
+      "root": "libs/decorators",
+      "sourceRoot": "libs/decorators/src",
+      "projectType": "library",
+      "prefix": "nge",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "libs/decorators/tsconfig.lib.json",
+            "project": "libs/decorators/ng-package.json"
+          },
+          "configurations": {
+            "production": {}
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "libs/decorators/src/test.ts",
+            "tsConfig": "libs/decorators/tsconfig.spec.json",
+            "karmaConfig": "libs/decorators/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "libs/decorators/tsconfig.lib.json",
+              "libs/decorators/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "schematics": {
